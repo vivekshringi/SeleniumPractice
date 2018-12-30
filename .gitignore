@@ -3,3 +3,7 @@
 .project
 .settings/
 geckodriver
+chromedriver
+.DS_Store
+
+

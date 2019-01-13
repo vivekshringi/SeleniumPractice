@@ -26,9 +26,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -61,6 +63,12 @@ public class AppTest {
 		profile.setPreference("browser.helperApps.neverAsk.saveToDisk","application/pdf,application/x-pdf,application/octet-stream");
 		profile.setPreference( "browser.download.manager.showWhenStarting", false );
 		profile.setPreference( "pdfjs.disabled", true );
+		
+		profile.setPreference("geo.enabled", true);
+		profile.setPreference("geo.provider.use_corelocation", false);
+		profile.setPreference("geo.prompt.testing", false);
+		profile.setPreference("geo.prompt.testing.allow", false);
+		
         options.setProfile(profile);
         driver = new FirefoxDriver(options);
         driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
@@ -339,22 +347,55 @@ public class AppTest {
     	Assert.assertEquals(w.getText(), "BOTTOM");
     }
     
-    @Test
+    //@Test
     public void iFrameTest() throws InterruptedException {
     	driver.navigate().to(URL+"/iframe");
     	driver.switchTo().frame("mce_0_ifr");
-    	String a = driver.findElement(By.cssSelector("#tinymce > p")).getText();
+    	String a = driver.findElement(By.cssSelector("#tinymce")).getText();
     	System.out.println(a);
-    	driver.findElement(By.cssSelector("#tinymce > p")).clear();
-    	driver.findElement(By.cssSelector("#tinymce > p")).sendKeys("ALL GOOD");
+    	driver.findElement(By.cssSelector("#tinymce")).clear();
+    	driver.findElement(By.cssSelector("#tinymce")).sendKeys("ALL GOOD");
     	Actions actionObj = new Actions(driver);
     	actionObj.keyDown(Keys.CONTROL)
     	         .sendKeys(Keys.chord("A"))
     	         .keyUp(Keys.CONTROL)
     	         .perform();
-    	Thread.sleep(5000);
+    	driver.switchTo().parentFrame();
+    	driver.findElement(By.cssSelector("#mceu_3 > button > i")).click();
+    	a=driver.findElement(By.cssSelector("#mceu_29")).getText();
+    	System.out.println(a);
+    	Assert.assertEquals(a, "p » strong");
+    	driver.findElement(By.id("mceu_15-open")).click();
+    	WebDriverWait wait = new WebDriverWait(driver, 10);
+    	WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".mce-text")));
+    	element.click();
+    	a=driver.findElement(By.cssSelector("#mceu_29")).getText();
+    	Assert.assertEquals(a, "p");
+    	driver.switchTo().frame("mce_0_ifr");
+    	a = driver.findElement(By.cssSelector("#tinymce")).getText();
+     	Assert.assertEquals(a, ""); 	
     }
-	
+    
+    @Test //To be done  
+    public void getLocationTest() {
+    	driver.navigate().to(URL+"/geolocation");
+    	driver.findElement(By.cssSelector("#content > div > button")).click();
+    	WebDriverWait wait = new WebDriverWait(driver, 10);
+    	WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#map-link")));
+    	element.click();
+    	String latValue = driver.findElement(By.id("lat-value")).getText();
+    	String longValue = driver.findElement(By.id("long-value")).getText();
+    	System.out.println(latValue);
+    	System.out.println(longValue);
+    }
+    
+   @Test //To be done 
+    public void getHorizontalSliderTest() throws InterruptedException {
+    	driver.navigate().to(URL+"/horizontal_slider");
+    	WebElement slider = driver.findElement(By.cssSelector("#content > div > div"));
+    	 Actions move = new Actions(driver);
+    	 move.dragAndDropBy(slider, 100, 0); 	Thread.sleep(4000);
+    }
 	@AfterClass
 	public void tearUp(){
 	    driver.quit();

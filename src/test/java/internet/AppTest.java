@@ -317,16 +317,42 @@ public class AppTest {
     			"×");
     }
     
-    @Test
-    public void framesTest() {
+    //@Test
+    public void nestedFrameTest() {
     	driver.navigate().to(URL+"/nested_frames");
+    	driver.switchTo().frame("frame-top");
     	driver.switchTo().frame("frame-left");
     	WebElement w = driver.findElement(By.tagName("body"));
-    	System.out.println(w.getText());
- 
-    	
-    	
-    	
+    	Assert.assertEquals(w.getText(), "LEFT");
+    	driver.switchTo().parentFrame();
+    	driver.switchTo().frame("frame-middle");
+    	w = driver.findElement(By.tagName("body"));
+     	Assert.assertEquals(w.getText(), "MIDDLE");
+    	driver.switchTo().parentFrame();
+    	driver.switchTo().frame("frame-right");
+    	w = driver.findElement(By.tagName("body"));
+    	Assert.assertEquals(w.getText(), "RIGHT");
+    	driver.switchTo().parentFrame();
+    	driver.switchTo().parentFrame();
+    	driver.switchTo().frame("frame-bottom");
+    	w = driver.findElement(By.tagName("body"));
+    	Assert.assertEquals(w.getText(), "BOTTOM");
+    }
+    
+    @Test
+    public void iFrameTest() throws InterruptedException {
+    	driver.navigate().to(URL+"/iframe");
+    	driver.switchTo().frame("mce_0_ifr");
+    	String a = driver.findElement(By.cssSelector("#tinymce > p")).getText();
+    	System.out.println(a);
+    	driver.findElement(By.cssSelector("#tinymce > p")).clear();
+    	driver.findElement(By.cssSelector("#tinymce > p")).sendKeys("ALL GOOD");
+    	Actions actionObj = new Actions(driver);
+    	actionObj.keyDown(Keys.CONTROL)
+    	         .sendKeys(Keys.chord("A"))
+    	         .keyUp(Keys.CONTROL)
+    	         .perform();
+    	Thread.sleep(5000);
     }
 	
 	@AfterClass

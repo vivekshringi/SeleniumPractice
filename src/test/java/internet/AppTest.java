@@ -376,7 +376,7 @@ public class AppTest {
      	Assert.assertEquals(a, ""); 	
     }
     
-    @Test //To be done  
+   // @Test //To be done  
     public void getLocationTest() {
     	driver.navigate().to(URL+"/geolocation");
     	driver.findElement(By.cssSelector("#content > div > button")).click();
@@ -392,9 +392,14 @@ public class AppTest {
    @Test //To be done 
     public void getHorizontalSliderTest() throws InterruptedException {
     	driver.navigate().to(URL+"/horizontal_slider");
-    	WebElement slider = driver.findElement(By.cssSelector("#content > div > div"));
-    	 Actions move = new Actions(driver);
-    	 move.dragAndDropBy(slider, 100, 0); 	Thread.sleep(4000);
+    	WebElement slider = driver.findElement(By.cssSelector("#content > div > div > input[type=\"range\"]"));
+    	Actions a = new Actions(driver);
+    	//a.dragAndDropBy(slider, 3, 0).build().perform();
+    	a.clickAndHold(slider).moveByOffset(-80, 0).moveByOffset(160, 0).release().build().perform();
+    	System.out.println(slider.getLocation());
+     	System.out.println(slider.getSize());
+    	String val = driver.findElement(By.id("range")).getText();
+    	Assert.assertEquals(val, "5");
     }
 	@AfterClass
 	public void tearUp(){

@@ -389,8 +389,8 @@ public class AppTest {
     	System.out.println(longValue);
     }
     
-   @Test //To be done 
-    public void getHorizontalSliderTest() throws InterruptedException {
+   //@Test
+    public void getHorizontalSliderTest(){
     	driver.navigate().to(URL+"/horizontal_slider");
     	WebElement slider = driver.findElement(By.cssSelector("#content > div > div > input[type=\"range\"]"));
     	Actions a = new Actions(driver);
@@ -401,6 +401,29 @@ public class AppTest {
     	String val = driver.findElement(By.id("range")).getText();
     	Assert.assertEquals(val, "5");
     }
+   
+   //@Test
+   public void hoverAll(){
+	   driver.navigate().to(URL+"/hovers");
+	   List<WebElement> List= driver.findElements(By.cssSelector(".figure"));
+	   Actions a = new Actions(driver);
+	   for(WebElement i : List){
+		  a.moveToElement(i).release().build().perform();
+		  System.out.println(i.getAttribute("textContent"));  
+	   }
+   }
+  
+   @Test
+   public void infiniteScrollTest() throws InterruptedException {
+	   driver.navigate().to(URL+"/infinite_scroll");
+	   JavascriptExecutor js = (JavascriptExecutor) driver;
+	   js.executeScript("window.scrollBy(0,document.body.scrollHeight)");
+       js.executeScript("window.scrollBy(0,1000)");
+       Thread.sleep(1000);
+       js.executeScript("window.scrollBy(0,1000)");
+       Thread.sleep(1000);
+   }
+
 	@AfterClass
 	public void tearUp(){
 	    driver.quit();

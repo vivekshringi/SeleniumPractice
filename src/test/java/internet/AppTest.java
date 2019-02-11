@@ -190,6 +190,7 @@ public class AppTest {
         Thread.sleep(2000);  
        Assert.assertEquals(source.getText(),"B");  
        Assert.assertEquals(target.getText(),"A");
+       sc.close();
 		}
 	
 	//@Test
@@ -413,7 +414,7 @@ public class AppTest {
 	   }
    }
   
-   @Test
+   //@Test
    public void infiniteScrollTest() throws InterruptedException {
 	   driver.navigate().to(URL+"/infinite_scroll");
 	   JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -422,7 +423,45 @@ public class AppTest {
        Thread.sleep(1000);
        js.executeScript("window.scrollBy(0,1000)");
        Thread.sleep(1000);
+       js.executeScript("window.scrollBy(0,1000)");
+       Thread.sleep(1000);
+       js.executeScript("window.scrollBy(0,1000)");
+       Thread.sleep(1000);
    }
+   
+   //@Test
+   public void jQueryUITest() throws InterruptedException {
+	   driver.navigate().to(URL+"/jqueryui/menu#");
+	   Thread.sleep(500);
+	   driver.findElement(By.id("ui-id-2")).click();
+	   Thread.sleep(500);
+	   driver.findElement(By.id("ui-id-4")).click();
+	   Thread.sleep(500);
+	   JavascriptExecutor js = (JavascriptExecutor) driver;
+	   js.executeScript("document.querySelector('#ui-id-8').click()");
+	   Thread.sleep(500);
+	   File downloadedFile = new File(downloadLoc + "menu.xls");
+	    Assert.assertTrue(downloadedFile.exists());
+   }
+   
+   
+   //@Test
+   public void javaScriptUITest() throws InterruptedException {
+	   driver.navigate().to(URL+"/javascript_alerts");
+       driver.findElement(By.cssSelector(".example > ul:nth-child(3) > li:nth-child(1) > button:nth-child(1)")).click();
+       driver.switchTo().alert().accept();
+       driver.findElement(By.cssSelector(".example > ul:nth-child(3) > li:nth-child(2) > button:nth-child(1)")).click();
+       driver.switchTo().alert().dismiss();
+       driver.findElement(By.cssSelector(".example > ul:nth-child(3) > li:nth-child(3) > button:nth-child(1)")).click();
+       String a = "Hello";
+       driver.switchTo().alert().sendKeys(a);
+       driver.switchTo().alert().accept();
+       Assert.assertEquals(driver.findElement(By.id("result")).getText(),"You entered: "+a);
+       
+   }
+   
+   
+   
 
 	@AfterClass
 	public void tearUp(){

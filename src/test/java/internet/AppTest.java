@@ -1,7 +1,6 @@
 package internet;
 
 import java.awt.AWTException;
-import java.awt.RenderingHints.Key;
 import java.awt.Robot;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,23 +25,25 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
+import internet.PageObject;
+import internet.Texts;
 
 public class AppTest {
 	WebDriver driver;
-	static final String URL="http://localhost:9292";
+	static final String URL="https://the-internet.herokuapp.com";
 	static int count =0;
 	String downloadLoc = "/Users/vivshr/Downloads/";
+	PageObject page;
+	Texts text;
 	
 	
 	@BeforeClass
@@ -53,11 +54,9 @@ public class AppTest {
 		FirefoxProfile profile = new FirefoxProfile();
 		profile.setAcceptUntrustedCertificates(true);
 		profile.setAssumeUntrustedCertificateIssuer(false);
-		//Set Location to store files after downloading.
 		profile.setPreference("browser.download.dir", downloadLoc);
 		profile.setPreference("browser.download.folderList", 2);
- 
-		//Set Preference to not show file download confirmation dialogue using MIME types Of different file extension types.
+		profile.setPreference("devtools.console.stdout.content", true);
 		profile.setPreference("browser.helperApps.neverAsk.saveToDisk", 
 		    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;txt"); 
 		profile.setPreference("browser.helperApps.neverAsk.saveToDisk","application/pdf,application/x-pdf,application/octet-stream");
@@ -68,23 +67,25 @@ public class AppTest {
 		profile.setPreference("geo.provider.use_corelocation", false);
 		profile.setPreference("geo.prompt.testing", false);
 		profile.setPreference("geo.prompt.testing.allow", false);
-		
         options.setProfile(profile);
         driver = new FirefoxDriver(options);
         driver.manage().timeouts().implicitlyWait(10,TimeUnit.SECONDS);
 		driver.get(URL);
+		page = PageFactory.initElements(driver, PageObject.class);
+		text = new Texts();
+
 	}
 	
 	//@Test 
 	public void basicAuth(){
 	    driver.get("http://admin:admin@the-internet.herokuapp.com/basic_auth");
-	    Assert.assertEquals(driver.findElement(By.cssSelector("p")).getText(), "Congratulations! You must have the proper credentials.");;
+	    Assert.assertEquals(page.messageElement.getText(),text.successString);;
 	}
 	
 	//@Test
 	public void brokenImageVerification() throws ClientProtocolException, IOException{
-		driver.navigate().to(URL+"/broken_images");
-		List <WebElement> images = driver.findElements(By.tagName("img"));
+		driver.navigate().to(URL + text.brokenImageURL);
+		List <WebElement> images = page.images;
 		for(WebElement l : images){
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpGet request = new HttpGet(l.getAttribute("src"));
@@ -94,22 +95,22 @@ public class AppTest {
 			  count++;
 			}
 		}
-		System.out.println(count+" images are broken out of "+images.size());
+		System.out.println(count+" images are broken out of "+ images.size());
 	}
 	
-	//@Test
+	@Test
 	public void challengingDOM(){
 	driver.navigate().to(URL+"/challenging_dom");
 	for(int i=0;i<10;i++){
-	driver.findElement(By.xpath("//div[@id='content']/div/div/div/div/a")).click();
-	List <WebElement> buttons = driver.findElements(By.xpath("//div[@id='content']/div/div/div/div/a"));
+	page.challangingDom_Element.click();
+	List <WebElement> buttons = page.challangingDom_buttons;
 	for(WebElement a : buttons){
 		Assert.assertTrue(Arrays.asList("baz", "foo", "qux","bar").contains(a.getText()));
 		System.out.println((a.getText()+"Text Color is "+a.getCssValue("background-color")));
 	}
-	System.out.println(driver.findElement(By.id("canvas")).getText());
-	System.out.println(driver.findElement(By.id("canvas")).getLocation());
-	System.out.println(driver.findElement(By.id("canvas")).getSize());
+	System.out.println(page.challangingDom_canvas.getText());
+	System.out.println(page.challangingDom_canvas.getLocation());
+	System.out.println(page.challangingDom_canvas.getSize());
 	}
 	}
 	
@@ -307,7 +308,7 @@ public class AppTest {
 			}
 	}
 	
-	//@Test SMTP needs to configured
+	//@Test
 	public void forgotPassword() throws InterruptedException {
 		driver.navigate().to(URL+"/forgot_password");
 		driver.findElement(By.id("email")).sendKeys("hello@giikihello.com");
@@ -377,7 +378,7 @@ public class AppTest {
      	Assert.assertEquals(a, ""); 	
     }
     
-   // @Test //To be done  
+   //@Test  
     public void getLocationTest() {
     	driver.navigate().to(URL+"/geolocation");
     	driver.findElement(By.cssSelector("#content > div > button")).click();
@@ -390,7 +391,7 @@ public class AppTest {
     	System.out.println(longValue);
     }
     
-   //@Test
+    //@Test
     public void getHorizontalSliderTest(){
     	driver.navigate().to(URL+"/horizontal_slider");
     	WebElement slider = driver.findElement(By.cssSelector("#content > div > div > input[type=\"range\"]"));
@@ -459,8 +460,6 @@ public class AppTest {
        Assert.assertEquals(driver.findElement(By.id("result")).getText(),"You entered: "+a);
        
    }
-   
-   
    
 
 	@AfterClass
